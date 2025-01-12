@@ -116,8 +116,8 @@ function cfKeyDown(e = window.event) {
       e.preventDefault(); // Stop normal action
       // Add item and clear input if anything besides whitespace was entered
       if (inp.value.trim().length &&
-          // Prevent duplicates
-          getRegisteredItems(this).indexOf(inp.value) === -1) {
+        // Prevent duplicates
+        getRegisteredItems(this).indexOf(inp.value) === -1) {
         addItem(this, inp.value.trim());
         inp.value = '';
       }
@@ -132,6 +132,20 @@ function cfKeyDown(e = window.event) {
     default:
       break;
   }
+}
+
+// Handle paste event
+function cfPaste(e) {
+  e.preventDefault();
+  const paste = (e.clipboardData || window.clipboardData).getData('text');
+  const items = paste.split('\n').map(item => item.trim()).filter(item => item.length > 0);
+  const cf = e.target.parentElement;
+  items.forEach(item => {
+    if (getRegisteredItems(cf).indexOf(item) === -1) {
+      addItem(cf, item);
+    }
+  });
+  e.target.value = '';
 }
 
 // == CONVERT ALL ELEMENTS WITH APPROPRIATE CLASS == //
@@ -150,5 +164,6 @@ cfs.forEach((cf) => {
 
   // Bind key events
   cf.onkeydown = cfKeyDown;
+  cf.getElementsByTagName('input')[0].onpaste = cfPaste;
 });
 
