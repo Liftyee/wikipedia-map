@@ -18,16 +18,17 @@ function renameNode(oldId, newName) {
   // The node doesn't need to be renamed
   if (newId === oldId) return oldId;
   // The node needs to be renamed - the new name doesn't exist on the graph yet.
-  edges.update([
+  const updatedEdges = [
     // Update all edges that were 'from' oldId to be 'from' newId
     ...edges.get({
-      filter: e => e.from === oldId,
+      filter: e => e.from === oldId && !getEdgeConnecting(newId, e.to),
     }).map(e => ({ ...e, from: newId })),
     // Update all edges that were 'to' oldId to be 'to' newId
     ...edges.get({
-      filter: e => e.to === oldId,
+      filter: e => e.to === oldId && !getEdgeConnecting(e.from, newId),
     }).map(e => ({ ...e, to: newId })),
-  ]);
+  ];
+  edges.update(updatedEdges);
   // The node already exists! We're just merging it
   if (nodes.get(newId)) {
     nodes.remove(oldId);
