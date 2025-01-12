@@ -24,11 +24,6 @@ shepherd.addStep({
   attachTo: '#input bottom',
   buttons: [
     {
-      text: 'Back',
-      classes: 'shepherd-button-secondary',
-      action: shepherd.back,
-    },
-    {
       text: 'Next',
       classes: 'shepbtn',
       action: shepherd.next,
