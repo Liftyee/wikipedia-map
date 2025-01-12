@@ -113,8 +113,9 @@ function go() {
       setStartPages(pageTitles);
     });
 
-  // Show 'clear' button
+  // Show 'clear' and 'prune' buttons
   document.getElementById('clear').style.display = '';
+  document.getElementById('prune').style.display = '';
 }
 
 

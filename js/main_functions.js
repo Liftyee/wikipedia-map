@@ -140,6 +140,21 @@ function removeLeafNode(node) {
 
 // TODO: Should we be able to remove nodes with multiple edges too?
 
+function pruneNetwork() {
+  // Calculate the degree of all nodes at once
+  const nodeDegrees = {};
+  edges.forEach(edge => {
+    nodeDegrees[edge.from] = (nodeDegrees[edge.from] || 0) + 1;
+    nodeDegrees[edge.to] = (nodeDegrees[edge.to] || 0) + 1;
+  });
+
+  // Get all nodes that only have one edge
+  const leafNodes = Object.keys(nodeDegrees).filter(id => nodeDegrees[id] === 1);
+
+  // Remove all leaf nodes
+  leafNodes.forEach(removeLeafNode);
+}
+
 // Get all the nodes tracing back to the start node.
 function getTraceBackNodes(node) {
   let currentNode = node;
