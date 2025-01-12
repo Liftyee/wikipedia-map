@@ -100,6 +100,9 @@ function expandNodeCallback(page, data) {
 }
 
 // Expand a node without freezing other stuff
+// TODO: Track if node was already expanded. 
+// Infinite links can be created between two nodes in some cases otherwise,
+// where the node previously created by expansion gets merged.
 function expandNode(id) {
   const pagename = unwrap(nodes.get(id).label);
   getSubPages(pagename).then(({ redirectedTo, links }) => {

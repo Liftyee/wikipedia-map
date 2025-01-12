@@ -52,22 +52,37 @@ function getPageHtml(pageName) {
  * @param {HtmlElement} element - An HTML element as returned by `getPageHtml`
  */
 const getFirstParagraph = element =>
-  // First paragraph that isn't marked as "empty"...
-  Array.from(element.querySelectorAll('.mw-parser-output > p:not(.mw-empty-elt)'))
-    // ...and isn't the "coordinates" container
-    .find(p => !p.querySelector('#coordinates'));
+    // First paragraph that isn't marked as "empty"...
+    Array.from(element.querySelectorAll('.mw-parser-output > p:not(.mw-empty-elt)'))
+        // ...and isn't the "coordinates" container
+        .find(p => !p.querySelector('#coordinates'));
+
+/**
+ * Get a DOM object for a given number of body paragraphs in page HTML, in sequential order.
+ * @param {HtmlElement} element - An HTML element as returned by `getPageHtml`
+ * @param {number} [count=4] - The number of paragraphs to retrieve
+ */
+const getNParagraphs = (element, count = 4) => {
+  // Get all paragraphs that aren't marked as "empty" and aren't the "coordinates" container
+  const paragraphs = Array.from(element.querySelectorAll('.mw-parser-output > p:not(.mw-empty-elt)'))
+    .filter(p => !p.querySelector('#coordinates'));
+  // Return the specified number of paragraphs
+  return paragraphs.slice(0, count);
+};
 
 /**
  * Get the name of each Wikipedia article linked.
- * @param {HtmlElement} element - An HTML element as returned by `getFirstParagraph`
+ * @param {HtmlElement[]} elements - An array of HTML elements as returned by `getNParagraphs`
  */
-function getWikiLinks(element) {
-  const links = Array.from(element.querySelectorAll('a'))
-    .map(link => link.getAttribute('href'))
-    .filter(href => href && href.startsWith('/wiki/')) // Only links to Wikipedia articles
-    .map(getPageTitleQuickly) // Get the title from the URL
-    .filter(isArticle) // Make sure it's an article and not a part of another namespace
-    .map(title => title.replace(/_/g, ' ')); // Replace underscores with spaces
+function getWikiLinks(elements) {
+  const links = elements.flatMap(element =>
+    Array.from(element.querySelectorAll('a'))
+      .map(link => link.getAttribute('href'))
+      .filter(href => href && href.startsWith('/wiki/')) // Only links to Wikipedia articles
+      .map(getPageTitleQuickly) // Get the title from the URL
+      .filter(isArticle) // Make sure it's an article and not a part of another namespace
+      .map(title => title.replace(/_/g, ' ')) // Replace underscores with spaces
+  );
   // Remove duplicates after normalizing
   const ids = links.map(getNormalizedId);
   const isUnique = ids.map((n, i) => ids.indexOf(n) === i); // 'true' in every spot that's unique
@@ -81,7 +96,7 @@ function getWikiLinks(element) {
 function getSubPages(pageName) {
   return getPageHtml(pageName).then(({ document: doc, redirectedTo }) => ({
     redirectedTo,
-    links: getWikiLinks(getFirstParagraph(doc)),
+    links: getWikiLinks(getNParagraphs(doc)),
   }));
 }
 
