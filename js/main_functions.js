@@ -112,6 +112,31 @@ function expandNode(id) {
   if (cfItem) cfItem.classList.add('locked');
 }
 
+// Remove a node that only has one edge (leaf node)
+function removeLeafNode(node) {
+  const nodeObj = nodes.get(node);
+  if (nodeObj.level === 0) return;
+
+  // Check that the node has at most one edge
+  // Nodes with zero edges should never exist,
+  // but we can easily remove those too
+  const connectedEdges = edges.get({
+    filter: e => e.from === node || e.to === node,
+  });
+  if (connectedEdges.length > 1) return;
+
+  // Don't remove if the node is one of the commafield items
+  const cf = document.getElementById('input');
+  const cfItem = cf.querySelector(`.item[data-node-id="${node}"]`);
+  if (cfItem) return;
+
+  // Remove the node and its edge
+  nodes.remove(node);
+  edges.remove(getEdgeConnecting(nodeObj.parent, node));
+}
+
+// TODO: Should we be able to remove nodes with multiple edges too?
+
 // Get all the nodes tracing back to the start node.
 function getTraceBackNodes(node) {
   let currentNode = node;

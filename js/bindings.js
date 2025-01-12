@@ -1,13 +1,19 @@
 /* global nodes, network, isTouchDevice, shepherd */
-/* global expandNode, traceBack, resetProperties, go, goRandom, clearNetwork, unwrap */
+/* global expandNode, removeLeafNode, traceBack, resetProperties, go, goRandom, clearNetwork, unwrap */
 // This script contains (most of) the code that binds actions to events.
 
 
 // Functions that will be used as bindings
-function expandEvent(params) { // Expand a node (with event handler)
+function nodeClickEvent(params) { // Expand a node (with event handler)
   if (params.nodes.length) { // Did the click occur on a node?
     const page = params.nodes[0]; // The id of the node clicked
-    expandNode(page);
+    if (params.event.srcEvent.ctrlKey) { // Was the control key pressed?
+      removeLeafNode(page); // Control + Click to remove a node
+      // NOTE: This keybind prevents the user from simultaneously expanding a node
+      // and opening its link in a new tab. Niche, but possible.
+    } else {
+      expandNode(page);
+    }
   }
 }
 
@@ -34,10 +40,10 @@ function openPageEvent(params) {
 // Bind the network events
 function bindNetwork() {
   if (isTouchDevice) { // Device has touchscreen
-    network.on('hold', expandEvent); // Long press to expand
+    network.on('hold', nodeClickEvent); // Long press to expand
     network.on('click', mobileTraceEvent); // Highlight traceback on click
   } else { // Device does not have touchscreen
-    network.on('click', expandEvent); // Expand on click
+    network.on('click', nodeClickEvent); // Expand on click
     network.on('hoverNode', params => traceBack(params.node)); // Highlight traceback on hover
     network.on('blurNode', resetProperties); // un-traceback on un-hover
   }
